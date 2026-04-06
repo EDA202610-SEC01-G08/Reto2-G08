@@ -51,12 +51,61 @@ def get_time():
 def delta_time(start, end):
     return float(end - start)
 
-def req_1(catalog):
+def req_1(catalog, brand, form_factor):
     """
     Retorna el resultado del requerimiento 1
+    Filtra equipos por marca y factor de forma
     """
-    # TODO: Modificar el requerimiento 1
-    pass
+    start_time = get_time()
+    
+    filtered_computers = al.new_list()
+    
+    computers_by_ff = sc.get(catalog["form_factor_map"], form_factor)
+    
+    if computers_by_ff is not None:
+        for i in range(1, al.size(computers_by_ff) + 1):
+            computer = al.get_element(computers_by_ff, i)
+            if computer["brand"] == brand:
+                al.add_last(filtered_computers, computer)
+    
+    total_count = al.size(filtered_computers)
+    
+    if total_count > 0:
+        total_price = 0
+        for i in range(1, total_count + 1):
+            computer = al.get_element(filtered_computers, i)
+            total_price += float(computer["price"])
+        average_price = total_price / total_count
+        
+        def sort_criteria(comp1, comp2):
+            price1 = float(comp1["price"])
+            price2 = float(comp2["price"])
+            if price1 > price2:
+                return True
+            elif price1 < price2:
+                return False
+            else:
+                return comp1["model"] < comp2["model"]
+        
+        al.merge_sort(filtered_computers, sort_criteria)
+        
+        if total_count > 20:
+            result_computers = filtered_computers["elements"][:10] + filtered_computers["elements"][-10:]
+        else:
+            result_computers = filtered_computers["elements"]
+    else:
+        average_price = 0
+        result_computers = []
+    
+    end_time = get_time()
+    execution_time = delta_time(start_time, end_time)
+    
+    return {
+        "execution_time": execution_time,
+        "total_count": total_count,
+        "average_price": average_price,
+        "computers": result_computers
+    }
 
 
 def req_2(catalog):
@@ -75,12 +124,84 @@ def req_3(catalog):
     pass
 
 
-def req_4(catalog):
+def req_4(catalog, cpu_brand, gpu_model):
     """
     Retorna el resultado del requerimiento 4
+    Obtiene el precio promedio para una combinación CPU Brand - GPU Model
     """
-    # TODO: Modificar el requerimiento 4
-    pass
+    start_time = get_time()
+    
+    filtered_computers = al.new_list()
+    
+    computers_by_gpu = mp.get(catalog["gpu_model_map"], gpu_model)
+    
+    if computers_by_gpu is not None:
+        for i in range(1, al.size(computers_by_gpu) + 1):
+            computer = al.get_element(computers_by_gpu, i)
+            if computer["cpu_brand"] == cpu_brand:
+                al.add_last(filtered_computers, computer)
+    
+    total_count = al.size(filtered_computers)
+    
+    if total_count > 0:
+        total_price = 0
+        total_vram = 0
+        total_ram = 0
+        total_cpu_boost = 0
+        
+        for i in range(1, total_count + 1):
+            computer = al.get_element(filtered_computers, i)
+            total_price += float(computer["price"])
+            total_vram += float(computer["vram_gb"])
+            total_ram += float(computer["ram_gb"])
+            total_cpu_boost += float(computer["cpu_boost_ghz"])
+        
+        average_price = total_price / total_count
+        average_vram = total_vram / total_count
+        average_ram = total_ram / total_count
+        average_cpu_boost = total_cpu_boost / total_count
+        
+        def sort_criteria(comp1, comp2):
+            price1 = float(comp1["price"])
+            price2 = float(comp2["price"])
+            if price1 > price2:
+                return True
+            elif price1 < price2:
+                return False
+            else:
+                return float(comp1["weight_kg"]) < float(comp2["weight_kg"])
+        
+        al.merge_sort(filtered_computers, sort_criteria)
+        
+        top_2 = []
+        for i in range(1, min(3, total_count + 1)):
+            computer = al.get_element(filtered_computers, i)
+            top_2.append({
+                "model": computer["model"],
+                "brand": computer["brand"],
+                "release_year": computer["release_year"],
+                "cpu_model": computer["cpu_model"],
+                "price": computer["price"]
+            })
+    else:
+        average_price = 0
+        average_vram = 0
+        average_ram = 0
+        average_cpu_boost = 0
+        top_2 = []
+    
+    end_time = get_time()
+    execution_time = delta_time(start_time, end_time)
+    
+    return {
+        "execution_time": execution_time,
+        "total_count": total_count,
+        "average_price": average_price,
+        "average_vram": average_vram,
+        "average_ram": average_ram,
+        "average_cpu_boost": average_cpu_boost,
+        "top_2": top_2
+    }
 
 
 def req_5(catalog):

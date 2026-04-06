@@ -32,15 +32,65 @@ def print_data(control, id):
     """
         Función que imprime un dato dado su ID
     """
-    #TODO: Realizar la función para imprimir un elemento
-    pass
+    if id < 1 or id > al.size(control["computers"]):
+        print("ID inválido")
+        return
+    
+    computer = al.get_element(control["computers"], id)
+    print("\n" + "="*80)
+    print(f"Tipo de dispositivo: {computer['device_type']}")
+    print(f"Marca: {computer['brand']}")
+    print(f"Modelo: {computer['model']}")
+    print(f"Sistema operativo: {computer['os']}")
+    print(f"Factor de forma: {computer['form_factor']}")
+    print(f"Marca del procesador: {computer['cpu_brand']}")
+    print(f"Modelo del procesador: {computer['cpu_model']}")
+    print(f"Memoria RAM: {computer['ram_gb']} GB")
+    print(f"Tipo de almacenamiento: {computer['storage_type']}")
+    print(f"Capacidad de almacenamiento: {computer['storage_gb']} GB")
+    print(f"Precio: ${computer['price']}")
+    print("="*80 + "\n")
 
 def print_req_1(control):
     """
         Función que imprime la solución del Requerimiento 1 en consola
     """
-    # TODO: Imprimir el resultado del requerimiento 1
-    pass
+    print("\n" + "="*80)
+    print("REQ 1: Consultar equipos por marca y factor de forma")
+    print("="*80)
+    
+    brand = input("Ingrese la marca del equipo (ej: HP, Lenovo, Dell): ")
+    form_factor = input("Ingrese el factor de forma (ej: ATX, Gaming): ")
+    
+    result = logic.req_1(control, brand, form_factor)
+    
+    print("\n" + "-"*80)
+    print(f"Tiempo de ejecución: {result['execution_time']:.2f} ms")
+    print(f"Total de equipos encontrados: {result['total_count']}")
+    print(f"Promedio de precios: ${result['average_price']:.2f}")
+    print("-"*80)
+    
+    if result['total_count'] == 0:
+        print("\nNo se encontraron equipos con los criterios especificados.")
+    else:
+        if result['total_count'] > 20:
+            print(f"\nMostrando los primeros 10 y últimos 10 de {result['total_count']} equipos:\n")
+        else:
+            print(f"\nMostrando los {result['total_count']} equipos encontrados:\n")
+        
+        for idx, computer in enumerate(result['computers'], 1):
+            print(f"\n{'─'*80}")
+            print(f"Equipo #{idx}")
+            print(f"{'─'*80}")
+            print(f"  Tipo de dispositivo:        {computer['device_type']}")
+            print(f"  Modelo:                     {computer['model']}")
+            print(f"  Sistema operativo:          {computer['os']}")
+            print(f"  Marca del procesador:       {computer['cpu_brand']}")
+            print(f"  Memoria RAM:                {computer['ram_gb']} GB")
+            print(f"  Capacidad de almacenamiento: {computer['storage_gb']} GB")
+            print(f"  Precio:                     ${computer['price']}")
+        
+        print("\n" + "="*80 + "\n")
 
 
 def print_req_2(control):
@@ -63,8 +113,45 @@ def print_req_4(control):
     """
         Función que imprime la solución del Requerimiento 4 en consola
     """
-    # TODO: Imprimir el resultado del requerimiento 4
-    pass
+    print("\n" + "="*80)
+    print("REQ 4: Precio promedio para combinación CPU Brand - GPU Model")
+    print("="*80)
+    
+    cpu_brand = input("Ingrese la marca del CPU (ej: Intel, AMD): ")
+    gpu_model = input("Ingrese el modelo del GPU (ej: RTX 40 50, RX 6000 60): ")
+    
+    result = logic.req_4(control, cpu_brand, gpu_model)
+    
+    print("\n" + "-"*80)
+    print(f"Tiempo de ejecución: {result['execution_time']:.2f} ms")
+    print(f"Total de computadores encontrados: {result['total_count']}")
+    print("-"*80)
+    
+    if result['total_count'] == 0:
+        print("\nNo se encontraron computadores con los criterios especificados.")
+    else:
+        print("\nESTADÍSTICAS PROMEDIO:")
+        print(f"  Precio promedio:              ${result['average_price']:.2f}")
+        print(f"  VRAM promedio:                {result['average_vram']:.2f} GB")
+        print(f"  RAM promedio:                 {result['average_ram']:.2f} GB")
+        print(f"  CPU Boost promedio:           {result['average_cpu_boost']:.2f} GHz")
+        
+        if len(result['top_2']) > 0:
+            print("\n" + "="*80)
+            print(f"LOS {len(result['top_2'])} COMPUTADORES MÁS COSTOSOS:")
+            print("="*80)
+            
+            for idx, computer in enumerate(result['top_2'], 1):
+                print(f"\n{'─'*80}")
+                print(f"Computador #{idx}")
+                print(f"{'─'*80}")
+                print(f"  Modelo:           {computer['model']}")
+                print(f"  Marca:            {computer['brand']}")
+                print(f"  Año de lanzamiento: {computer['release_year']}")
+                print(f"  CPU Model:        {computer['cpu_model']}")
+                print(f"  Precio:           ${computer['price']}")
+        
+        print("\n" + "="*80 + "\n")
 
 
 def print_req_5(control):
