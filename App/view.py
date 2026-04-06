@@ -1,12 +1,10 @@
 import sys
-
+import App.logic as logic
+from DataStructures import array_list as al
 
 def new_logic():
-    """
-        Se crea una instancia del controlador
-    """
-    #TODO: Llamar la función de la lógica donde se crean las estructuras de datos
-    pass
+    return logic.new_logic()
+
 
 def print_menu():
     print("Bienvenido")
@@ -20,11 +18,14 @@ def print_menu():
     print("7- Salir")
 
 def load_data(control):
-    """
-    Carga los datos
-    """
-    #TODO: Realizar la carga de datos
-    pass
+    filename = input("Ingrese el nombre del archivo (ej: computer_prices_10): ")
+    filepath = "Data/" + filename + ".csv"
+    start = logic.get_time()
+    logic.load_data(control, filepath)
+    end = logic.get_time()
+    print("Datos cargados exitosamente")
+    print("Total registros:", al.size(control["computers"]))
+    print("Tiempo de carga:", logic.delta_time(start, end), "ms")
 
 
 def print_data(control, id):

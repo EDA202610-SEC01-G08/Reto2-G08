@@ -1,24 +1,55 @@
 import time
+import csv
+import time
+from DataStructures import array_list as al
+from DataStructures import map_linear_probing as mp
+from DataStructures import map_separate_chaining as sc
+
+csv.field_size_limit(2147483647)
+
 
 def new_logic():
-    """
-    Crea el catalogo para almacenar las estructuras de datos
-    """
-    #TODO: Llama a las funciónes de creación de las estructuras de datos
-    pass
+    catalog = {
+        "computers": al.new_list(),
+        "gpu_model_map": mp.new_map(1000, 0.5),
+        "form_factor_map": sc.new_map(1000, 2.0),
+    }
+    return catalog
 
-
-# Funciones para la carga de datos
 
 def load_data(catalog, filename):
-    """
-    Carga los datos del reto
-    """
-    # TODO: Realizar la carga de datos
-    pass
+    with open(filename, encoding="utf-8") as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            al.add_last(catalog["computers"], row)
 
-# Funciones de consulta sobre el catálogo
+            # Insertar en gpu_model_map (linear probing)
+            gpu = row["gpu_model"]
+            existing = mp.get(catalog["gpu_model_map"], gpu)
+            if existing is None:
+                new_lst = al.new_list()
+                al.add_last(new_lst, row)
+                mp.put(catalog["gpu_model_map"], gpu, new_lst)
+            else:
+                al.add_last(existing, row)
 
+            # Insertar en form_factor_map (separate chaining)
+            ff = row["form_factor"]
+            existing2 = sc.get(catalog["form_factor_map"], ff)
+            if existing2 is None:
+                new_lst2 = al.new_list()
+                al.add_last(new_lst2, row)
+                sc.put(catalog["form_factor_map"], ff, new_lst2)
+            else:
+                al.add_last(existing2, row)
+
+    return catalog
+
+def get_time():
+    return float(time.perf_counter() * 1000)
+
+def delta_time(start, end):
+    return float(end - start)
 
 def req_1(catalog):
     """
