@@ -204,12 +204,86 @@ def req_4(catalog, cpu_brand, gpu_model):
     }
 
 
-def req_5(catalog):
+def req_5(catalog, n, year_initial, year_final, brand, form_factor):
     """
     Retorna el resultado del requerimiento 5
+    Obtiene los N equipos mejor equipados según factor de forma y marca en un rango de años
     """
-    # TODO: Modificar el requerimiento 5
-    pass
+    start_time = get_time()
+    
+    filtered_computers = al.new_list()
+    
+    computers_by_ff = sc.get(catalog["form_factor_map"], form_factor)
+    
+    if computers_by_ff is not None:
+        for i in range(1, al.size(computers_by_ff) + 1):
+            computer = al.get_element(computers_by_ff, i)
+            release_year = int(computer["release_year"])
+            if (computer["brand"] == brand and 
+                release_year >= year_initial and 
+                release_year <= year_final):
+                al.add_last(filtered_computers, computer)
+    
+    total_count = al.size(filtered_computers)
+    
+    intel_count = 0
+    amd_count = 0
+    
+    for i in range(1, total_count + 1):
+        computer = al.get_element(filtered_computers, i)
+        if computer["cpu_brand"] == "Intel":
+            intel_count += 1
+        elif computer["cpu_brand"] == "AMD":
+            amd_count += 1
+    
+    if total_count > 0:
+        def sort_criteria(comp1, comp2):
+            ram1 = float(comp1["ram_gb"])
+            ram2 = float(comp2["ram_gb"])
+            if ram1 > ram2:
+                return True
+            elif ram1 < ram2:
+                return False
+            else:
+                boost1 = float(comp1["cpu_boost_ghz"])
+                boost2 = float(comp2["cpu_boost_ghz"])
+                if boost1 > boost2:
+                    return True
+                elif boost1 < boost2:
+                    return False
+                else:
+                    price1 = float(comp1["price"])
+                    price2 = float(comp2["price"])
+                    return price1 < price2
+        
+        al.merge_sort(filtered_computers, sort_criteria)
+        
+        top_n = []
+        for i in range(1, min(n + 1, total_count + 1)):
+            computer = al.get_element(filtered_computers, i)
+            top_n.append({
+                "device_type": computer["device_type"],
+                "model": computer["model"],
+                "ram_gb": computer["ram_gb"],
+                "cpu_boost_ghz": computer["cpu_boost_ghz"],
+                "price": computer["price"],
+                "release_year": computer["release_year"],
+                "cpu_brand": computer["cpu_brand"],
+                "cpu_model": computer["cpu_model"]
+            })
+    else:
+        top_n = []
+    
+    end_time = get_time()
+    execution_time = delta_time(start_time, end_time)
+    
+    return {
+        "execution_time": execution_time,
+        "total_count": total_count,
+        "intel_count": intel_count,
+        "amd_count": amd_count,
+        "top_n": top_n
+    }
 
 def req_6(catalog):
     """

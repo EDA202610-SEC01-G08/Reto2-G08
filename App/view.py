@@ -158,8 +158,47 @@ def print_req_5(control):
     """
         Función que imprime la solución del Requerimiento 5 en consola
     """
-    # TODO: Imprimir el resultado del requerimiento 5
-    pass
+    print("\n" + "="*80)
+    print("REQ 5: Top N equipos mejor equipados por marca y factor de forma")
+    print("="*80)
+    
+    n = int(input("Ingrese el número de computadores a listar (ej: 3, 5, 10): "))
+    year_initial = int(input("Ingrese el año de lanzamiento inicial (ej: 2019): "))
+    year_final = int(input("Ingrese el año de lanzamiento final (ej: 2024): "))
+    brand = input("Ingrese la marca (ej: HP, Lenovo, Dell): ")
+    form_factor = input("Ingrese el factor de forma (ej: ATX, Gaming): ")
+    
+    result = logic.req_5(control, n, year_initial, year_final, brand, form_factor)
+    
+    print("\n" + "-"*80)
+    print(f"Tiempo de ejecución: {result['execution_time']:.2f} ms")
+    print(f"Total de computadores encontrados: {result['total_count']}")
+    print(f"Computadores con procesador Intel: {result['intel_count']}")
+    print(f"Computadores con procesador AMD: {result['amd_count']}")
+    print("-"*80)
+    
+    if result['total_count'] == 0:
+        print("\nNo se encontraron computadores con los criterios especificados.")
+    else:
+        if len(result['top_n']) > 0:
+            print(f"\n{'='*80}")
+            print(f"TOP {len(result['top_n'])} COMPUTADORES MEJOR EQUIPADOS:")
+            print(f"{'='*80}")
+            
+            for idx, computer in enumerate(result['top_n'], 1):
+                print(f"\n{'─'*80}")
+                print(f"Computador #{idx}")
+                print(f"{'─'*80}")
+                print(f"  Tipo de dispositivo:  {computer['device_type']}")
+                print(f"  Modelo:               {computer['model']}")
+                print(f"  Memoria RAM:          {computer['ram_gb']} GB")
+                print(f"  CPU Boost:            {computer['cpu_boost_ghz']} GHz")
+                print(f"  Precio:               ${computer['price']}")
+                print(f"  Año de lanzamiento:   {computer['release_year']}")
+                print(f"  Marca de CPU:         {computer['cpu_brand']}")
+                print(f"  Modelo de CPU:        {computer['cpu_model']}")
+        
+        print("\n" + "="*80 + "\n")
 
 
 def print_req_6(control):
