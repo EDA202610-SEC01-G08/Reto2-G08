@@ -325,12 +325,65 @@ def req_5(catalog, n, year_initial, year_final, brand, form_factor):
         "top_n": top_n
     }
 
-def req_6(catalog):
-    """
-    Retorna el resultado del requerimiento 6
-    """
-    # TODO: Modificar el requerimiento 6
-    pass
+def req_6(catalog, form_factor, display_type, n):
+    # 1. Obtener lista por form_factor
+    ff_list = sc.get(catalog["form_factor_map"], form_factor)
+    
+    if ff_list is None:
+        return None, 0, 0, 0
+    
+    # 2. Filtrar por display_type, solo laptops, y calcular score
+    filtered = al.new_list()
+    windows_count = 0
+    linux_count = 0
+    
+    for i in range(1, al.size(ff_list) + 1):
+        computer = al.get_element(ff_list, i)
+        if (computer["device_type"].lower() == "laptop" and
+                computer["display_type"].lower() == display_type.lower()):
+            charger = float(computer["charger_watts"]) if computer["charger_watts"] else 0
+            if charger == 0:
+                continue
+            battery = float(computer["battery_wh"]) if computer["battery_wh"] else 0
+            boost = float(computer["cpu_boost_ghz"]) if computer["cpu_boost_ghz"] else 0
+            computer["efficient_score"] = (battery * boost) / charger
+            al.add_last(filtered, computer)
+            if computer["os"].lower() == "windows":
+                windows_count += 1
+            elif computer["os"].lower() == "linux":
+                linux_count += 1
+    
+    total = al.size(filtered)
+    if total == 0:
+        return None, 0, 0, 0
+    
+    # 3. Selection sort descendente por score, desempate precio ascendente
+    size = al.size(filtered)
+    for i in range(1, size):
+        max_pos = i
+        for j in range(i + 1, size + 1):
+            comp_i = al.get_element(filtered, max_pos)
+            comp_j = al.get_element(filtered, j)
+            score_i = comp_i["efficient_score"]
+            score_j = comp_j["efficient_score"]
+            if score_j > score_i:
+                max_pos = j
+            elif score_j == score_i:
+                if float(comp_j["price"]) < float(comp_i["price"]):
+                    max_pos = j
+        if max_pos != i:
+            elem_i = al.get_element(filtered, i)
+            elem_max = al.get_element(filtered, max_pos)
+            al.change_info(filtered, i, elem_max)
+            al.change_info(filtered, max_pos, elem_i)
+    
+    # 4. Retornar top N
+    result = al.new_list()
+    limit = min(n, total)
+    for i in range(1, limit + 1):
+        al.add_last(result, al.get_element(filtered, i))
+    
+    return result, total, windows_count, linux_count
 
 
 # Funciones para medir tiempos de ejecucion

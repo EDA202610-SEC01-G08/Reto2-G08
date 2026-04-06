@@ -112,7 +112,7 @@ def print_req_3(control):
             print("Ejemplo brand:", al.get_element(test, 1)["brand"])
     else:
         print("GPU model no encontrado en el mapa")
-    
+
     start = logic.get_time()
     result, total = logic.req_3(control, gpu_model, brand, n)
     end = logic.get_time()
@@ -234,11 +234,32 @@ def print_req_5(control):
 
 
 def print_req_6(control):
-    """
-        Función que imprime la solución del Requerimiento 6 en consola
-    """
-    # TODO: Imprimir el resultado del requerimiento 6
-    pass
+    form_factor = input("Ingrese el factor de forma (ej: Gaming): ")
+    display_type = input("Ingrese el tipo de pantalla (ej: OLED): ")
+    n = int(input("Ingrese el número de equipos a listar (N): "))
+    
+    start = logic.get_time()
+    result, total, windows, linux = logic.req_6(control, form_factor, display_type, n)
+    end = logic.get_time()
+    
+    print("\nTiempo de ejecución:", logic.delta_time(start, end), "ms")
+    print("Total equipos encontrados:", total)
+    print("Con Windows:", windows)
+    print("Con Linux:", linux)
+    
+    if result is None or al.size(result) == 0:
+        print("No se encontraron equipos con esos criterios.")
+        return
+    
+    print("\nTop", n, "equipos con mejor eficiencia energética:")
+    print("-" * 80)
+    for i in range(1, al.size(result) + 1):
+        c = al.get_element(result, i)
+        print(f"  {i}. {c['model']}")
+        print(f"     RAM: {c['ram_gb']} GB | CPU: {c['cpu_model']}")
+        print(f"     CPU Boost: {c['cpu_boost_ghz']} GHz")
+        print(f"     Puntaje eficiencia: {c['efficient_score']:.4f}")
+        print()
 
 # Se crea la lógica asociado a la vista
 control = new_logic()
@@ -271,7 +292,7 @@ def main():
         elif int(inputs) == 5:
             print_req_5(control)
 
-        elif int(inputs) == 5:
+        elif int(inputs) == 6:
             print_req_6(control)
 
         elif int(inputs) == 7:
