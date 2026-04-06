@@ -1,6 +1,7 @@
 import sys
 import App.logic as logic
 from DataStructures import array_list as al
+from DataStructures import map_linear_probing as mp
 
 def new_logic():
     return logic.new_logic()
@@ -102,11 +103,42 @@ def print_req_2(control):
 
 
 def print_req_3(control):
-    """
-        Función que imprime la solución del Requerimiento 3 en consola
-    """
-    # TODO: Imprimir el resultado del requerimiento 3
-    pass
+    gpu_model = input("Ingrese el modelo de GPU con espacio antes de los ultimos 2 digitos (ej: RTX 40 90): ")
+    brand = input("Ingrese la marca del equipo (ej: Dell): ")
+    n = int(input("Ingrese el número de equipos a listar (N): "))
+    test = mp.get(control["gpu_model_map"], gpu_model)
+    if test is not None:
+            print("Equipos con ese GPU:", al.size(test))
+            print("Ejemplo brand:", al.get_element(test, 1)["brand"])
+    else:
+        print("GPU model no encontrado en el mapa")
+    
+    start = logic.get_time()
+    result, total = logic.req_3(control, gpu_model, brand, n)
+    end = logic.get_time()
+    
+    print("\nTiempo de ejecución:", logic.delta_time(start, end), "ms")
+    print("Total equipos encontrados:", total)
+    
+    if result is None or al.size(result) == 0:
+        print("No se encontraron equipos con esos criterios.")
+        return
+    
+    avg_ram = 0
+    for i in range(1, al.size(result) + 1):
+        avg_ram += float(al.get_element(result, i)["ram_gb"])
+    avg_ram = avg_ram / al.size(result)
+    print("Promedio RAM:", avg_ram, "GB")
+    
+    print("\nTop", n, "equipos más costosos:")
+    print("-" * 80)
+    for i in range(1, al.size(result) + 1):
+        c = al.get_element(result, i)
+        print(f"  {i}. {c['model']}")
+        print(f"     Tipo: {c['device_type']} | RAM: {c['ram_gb']} GB | Storage: {c['storage_gb']} GB")
+        print(f"     GPU: {c['gpu_brand']} {c['gpu_model']} | Peso: {c['weight_kg']} kg")
+        print(f"     Precio: ${c['price']}")
+        print()
 
 
 def print_req_4(control):

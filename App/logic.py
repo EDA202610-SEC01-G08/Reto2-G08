@@ -116,12 +116,52 @@ def req_2(catalog):
     pass
 
 
-def req_3(catalog):
-    """
-    Retorna el resultado del requerimiento 3
-    """
-    # TODO: Modificar el requerimiento 3
-    pass
+def req_3(catalog, gpu_model, brand, n):
+    # 1. Obtener lista de equipos con ese gpu_model
+    gpu_list = mp.get(catalog["gpu_model_map"], gpu_model)
+    
+    if gpu_list is None:
+        return None, 0
+    
+    # 2. Filtrar por brand
+    filtered = al.new_list()
+    for i in range(1, al.size(gpu_list) + 1):
+        computer = al.get_element(gpu_list, i)
+        if computer["brand"].lower() == brand.lower():
+            al.add_last(filtered, computer)
+    
+    total = al.size(filtered)
+    
+    if total == 0:
+        return None, 0
+    
+    # 3. Selection sort descendente por precio, desempate por peso descendente
+    size = al.size(filtered)
+    for i in range(1, size):
+        max_pos = i
+        for j in range(i + 1, size + 1):
+            comp_i = al.get_element(filtered, max_pos)
+            comp_j = al.get_element(filtered, j)
+            price_i = float(comp_i["price"])
+            price_j = float(comp_j["price"])
+            if price_j > price_i:
+                max_pos = j
+            elif price_j == price_i:
+                if float(comp_j["weight_kg"]) > float(comp_i["weight_kg"]):
+                    max_pos = j
+        if max_pos != i:
+            elem_i = al.get_element(filtered, i)
+            elem_max = al.get_element(filtered, max_pos)
+            al.change_info(filtered, i, elem_max)
+            al.change_info(filtered, max_pos, elem_i)
+    
+    # 4. Retornar top N
+    result = al.new_list()
+    limit = min(n, total)
+    for i in range(1, limit + 1):
+        al.add_last(result, al.get_element(filtered, i))
+    
+    return result, total
 
 
 def req_4(catalog, cpu_brand, gpu_model):
