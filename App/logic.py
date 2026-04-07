@@ -55,12 +55,17 @@ def req_1(catalog, brand, form_factor):
     """
     Retorna el resultado del requerimiento 1
     Filtra equipos por marca y factor de forma
+    Retorna diccionario con:
+    - execution_time: tiempo de ejecución
+    - total_count: cantidad de equipos encontrados
+    - average_price: precio promedio
+    - computers: lista de equipos (máximo 20, primeros 10 y últimos 10)
     """
     start_time = get_time()
     
     filtered_computers = al.new_list()
     
-    computers_by_ff = sc.get(catalog["form_factor_map"], form_factor)
+    computers_by_ff = sc.get(catalog["form_factor_map"], form_factor) #arraylist
     
     if computers_by_ff is not None:
         for i in range(1, al.size(computers_by_ff) + 1):
@@ -72,6 +77,7 @@ def req_1(catalog, brand, form_factor):
     
     if total_count > 0:
         total_price = 0
+        #promedio precios
         for i in range(1, total_count + 1):
             computer = al.get_element(filtered_computers, i)
             total_price += float(computer["price"])
@@ -85,7 +91,7 @@ def req_1(catalog, brand, form_factor):
             elif price1 < price2:
                 return False
             else:
-                return comp1["model"] < comp2["model"]
+                return comp1["model"] < comp2["model"] #desempate por modelo
         
         al.merge_sort(filtered_computers, sort_criteria)
         
@@ -168,12 +174,20 @@ def req_4(catalog, cpu_brand, gpu_model):
     """
     Retorna el resultado del requerimiento 4
     Obtiene el precio promedio para una combinación CPU Brand - GPU Model
+    Retorna diccionario con:
+    - execution_time: tiempo de ejecución
+    - total_count: cantidad de equipos encontrados
+    - average_price: precio promedio
+    - average_vram: VRAM promedio
+    - average_ram: RAM promedio
+    - average_cpu_boost: CPU boost promedio
+    - top_2: lista con los 2 equipos con mayor precio
     """
     start_time = get_time()
     
     filtered_computers = al.new_list()
     
-    computers_by_gpu = mp.get(catalog["gpu_model_map"], gpu_model)
+    computers_by_gpu = mp.get(catalog["gpu_model_map"], gpu_model) #arraylist
     
     if computers_by_gpu is not None:
         for i in range(1, al.size(computers_by_gpu) + 1):
@@ -189,6 +203,7 @@ def req_4(catalog, cpu_brand, gpu_model):
         total_ram = 0
         total_cpu_boost = 0
         
+        #promedios
         for i in range(1, total_count + 1):
             computer = al.get_element(filtered_computers, i)
             total_price += float(computer["price"])
@@ -201,6 +216,7 @@ def req_4(catalog, cpu_brand, gpu_model):
         average_ram = total_ram / total_count
         average_cpu_boost = total_cpu_boost / total_count
         
+        #ordenar por precio
         def sort_criteria(comp1, comp2):
             price1 = float(comp1["price"])
             price2 = float(comp2["price"])
@@ -209,12 +225,12 @@ def req_4(catalog, cpu_brand, gpu_model):
             elif price1 < price2:
                 return False
             else:
-                return float(comp1["weight_kg"]) < float(comp2["weight_kg"])
+                return float(comp1["weight_kg"]) < float(comp2["weight_kg"]) #desempate por peso
         
         al.merge_sort(filtered_computers, sort_criteria)
         
         top_2 = []
-        for i in range(1, min(3, total_count + 1)):
+        for i in range(1, min(3, total_count + 1)): #si hay menos de 2 equipos, se devuelve todos
             computer = al.get_element(filtered_computers, i)
             top_2.append({
                 "model": computer["model"],
@@ -248,6 +264,12 @@ def req_5(catalog, n, year_initial, year_final, brand, form_factor):
     """
     Retorna el resultado del requerimiento 5
     Obtiene los N equipos mejor equipados según factor de forma y marca en un rango de años
+    Retorna diccionario con:
+    - execution_time: tiempo de ejecución
+    - total_count: cantidad de equipos encontrados
+    - intel_count: cantidad de CPUs Intel
+    - amd_count: cantidad de CPUs AMD
+    - top_n: lista de los N mejores equipos
     """
     start_time = get_time()
     
@@ -268,7 +290,7 @@ def req_5(catalog, n, year_initial, year_final, brand, form_factor):
     
     intel_count = 0
     amd_count = 0
-    
+    #contar CPUs de cada marca
     for i in range(1, total_count + 1):
         computer = al.get_element(filtered_computers, i)
         if computer["cpu_brand"] == "Intel":
@@ -284,14 +306,14 @@ def req_5(catalog, n, year_initial, year_final, brand, form_factor):
                 return True
             elif ram1 < ram2:
                 return False
-            else:
+            else: #desempate por boost
                 boost1 = float(comp1["cpu_boost_ghz"])
                 boost2 = float(comp2["cpu_boost_ghz"])
                 if boost1 > boost2:
                     return True
                 elif boost1 < boost2:
                     return False
-                else:
+                else: #desempate por precio
                     price1 = float(comp1["price"])
                     price2 = float(comp2["price"])
                     return price1 < price2
@@ -326,13 +348,23 @@ def req_5(catalog, n, year_initial, year_final, brand, form_factor):
     }
 
 def req_6(catalog, form_factor, display_type, n):
-    # 1. Obtener lista por form_factor
+    """
+    Retorna el resultado del requerimiento 6
+    Obtiene los N equipos mejor equipados según factor de forma y tipo de pantalla
+    Retorna diccionario con:
+    - execution_time: tiempo de ejecución
+    - total_count: cantidad de equipos encontrados
+    - windows_count: cantidad de equipos con Windows
+    - linux_count: cantidad de equipos con Linux
+    - top_n: lista de los N mejores equipos
+    """
+    # lista por form_factor
     ff_list = sc.get(catalog["form_factor_map"], form_factor)
     
     if ff_list is None:
         return None, 0, 0, 0
     
-    # 2. Filtrar por display_type, solo laptops, y calcular score
+    # filtrar por display_type, solo laptops, y calcular score
     filtered = al.new_list()
     windows_count = 0
     linux_count = 0
@@ -357,27 +389,19 @@ def req_6(catalog, form_factor, display_type, n):
     if total == 0:
         return None, 0, 0, 0
     
-    # 3. Selection sort descendente por score, desempate precio ascendente
-    size = al.size(filtered)
-    for i in range(1, size):
-        max_pos = i
-        for j in range(i + 1, size + 1):
-            comp_i = al.get_element(filtered, max_pos)
-            comp_j = al.get_element(filtered, j)
-            score_i = comp_i["efficient_score"]
-            score_j = comp_j["efficient_score"]
-            if score_j > score_i:
-                max_pos = j
-            elif score_j == score_i:
-                if float(comp_j["price"]) < float(comp_i["price"]):
-                    max_pos = j
-        if max_pos != i:
-            elem_i = al.get_element(filtered, i)
-            elem_max = al.get_element(filtered, max_pos)
-            al.change_info(filtered, i, elem_max)
-            al.change_info(filtered, max_pos, elem_i)
+    # merge sort descendente por score, desempate precio ascendente
+    def sort_crit(comp1, comp2):
+        score1 = comp1["efficient_score"]
+        score2 = comp2["efficient_score"]
+        if score1 > score2:
+            return True
+        elif score1 == score2:
+            return float(comp1["price"]) < float(comp2["price"])
+        return False
     
-    # 4. Retornar top N
+    al.merge_sort(filtered, sort_crit)
+    
+    # retornar top N
     result = al.new_list()
     limit = min(n, total)
     for i in range(1, limit + 1):
