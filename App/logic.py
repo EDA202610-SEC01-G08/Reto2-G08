@@ -141,25 +141,20 @@ def req_3(catalog, gpu_model, brand, n):
     if total == 0:
         return None, 0
     
-    # 3. Selection sort descendente por precio, desempate por peso descendente
-    size = al.size(filtered)
-    for i in range(1, size):
-        max_pos = i
-        for j in range(i + 1, size + 1):
-            comp_i = al.get_element(filtered, max_pos)
-            comp_j = al.get_element(filtered, j)
-            price_i = float(comp_i["price"])
-            price_j = float(comp_j["price"])
-            if price_j > price_i:
-                max_pos = j
-            elif price_j == price_i:
-                if float(comp_j["weight_kg"]) > float(comp_i["weight_kg"]):
-                    max_pos = j
-        if max_pos != i:
-            elem_i = al.get_element(filtered, i)
-            elem_max = al.get_element(filtered, max_pos)
-            al.change_info(filtered, i, elem_max)
-            al.change_info(filtered, max_pos, elem_i)
+    # 3. Merge sort descendente por precio, desempate por peso descendente
+    def sort_criteria(comp1, comp2):
+        price1 = float(comp1["price"])
+        price2 = float(comp2["price"])
+        if price1 > price2:
+            return True
+        elif price1 < price2:
+            return False
+        else:
+            weight1 = float(comp1["weight_kg"])
+            weight2 = float(comp2["weight_kg"])
+            return weight1 > weight2
+    
+    al.merge_sort(filtered, sort_criteria)
     
     # 4. Retornar top N
     result = al.new_list()
