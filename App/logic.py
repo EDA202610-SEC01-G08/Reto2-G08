@@ -369,7 +369,7 @@ def req_6(catalog, form_factor, display_type, n):
         if (computer["device_type"].lower() == "laptop" and
                 computer["display_type"].lower() == display_type.lower()):
             charger = float(computer["charger_watts"]) if computer["charger_watts"] else 0
-            if charger == 0:
+            if charger == 0: #evitar division por cero
                 continue
             battery = float(computer["battery_wh"]) if computer["battery_wh"] else 0
             boost = float(computer["cpu_boost_ghz"]) if computer["cpu_boost_ghz"] else 0
